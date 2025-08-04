@@ -6,73 +6,67 @@
 /*   By: hermarti <hermarti@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 17:37:14 by hermarti          #+#    #+#             */
-/*   Updated: 2025/07/31 17:42:43 by hermarti         ###   ########.fr       */
+/*   Updated: 2025/08/04 16:04:35 by hermarti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 #include "libft.h"
 #include <stdarg.h>
-#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <unistd.h>
 
-int	ft_printf_char(char c, const char **format, int fd)
+int	ft_print_formart(char flag, va_list args)
 {
-	ft_putchar_fd(c, fd);
-	(*format)++;
-	return (1);
-}
+	int	p_count;
 
-int	ft_printf_string(char *s, const char **format, int fd)
-{
-	size_t	i;
-
-	i = 0;
-	ft_putstr_fd(s, fd);
-	while (s[i])
-	{
-		(*format)++;
-		i++;
-	}
-	return (i);
-}
-
-int	ft_printf_point(void *p, const char **format, int fd)
-{
-	size_t	i;
-
-	i = 0;
+	p_count = 0;
+	if (flag == 'c')
+		p_count += ft_printf_char(va_arg(args, int), 1);
+	if (flag == 's')
+		p_count += ft_printf_string(va_arg(args, char *), 1);
+	if (flag == 'p')
+		p_count += ft_printf_pointer(va_arg(args, unsigned long), 1);
+	if (flag == 'd')
+		p_count += ft_printf_decimal(va_arg(args, int), 1);
+	if (flag == 'i')
+		p_count += ft_printf_interger(va_arg(args, int), 1);
+	if (flag == 'u')
+		p_count += ft_printf_uinterger(va_arg(args, unsigned int), 1);
+	if (flag == 'x')
+		p_count += ft_printf_hex(flag, va_arg(args, unsigned int), 1);
+	if (flag == 'X')
+		p_count += ft_printf_hex(flag, va_arg(args, unsigned int), 1);
+	if (flag == '%')
+		p_count += ft_putchar_fd('%', 1);
+	return (p_count);
 }
 
 int	ft_printf(const char *format, ...)
 {
-	size_t	pcount;
+	int		p_count;
+	int		res_count;
 	va_list	args;
 
-	pcount = 0;
+	p_count = 0;
+	res_count = 0;
 	va_start(args, format);
 	while (*format)
 	{
-		if (*format++ == '%')
+		if (*format == '%')
 		{
+			format++;
 			if (*format == '\0')
 				break ;
-			if (*format == 'c')
-			{
-				pcount += ft_printf_char(va_arg(args, int), &format, 1);
-			}
-			else if (*format == 's')
-			{
-				pcount += ft_printf_string(va_arg(args, char *), &format, 1);
-			}
-			else if (*format == 'p')
-			{
-				pcount += ft_printf_pointer(va_arg(args, void *), &format, 1);
-			}
+			p_count += ft_print_formart(*format, args);
+			format++;
 		}
-		format++;
+		else
+		{
+			p_count += ft_putchar_fd(*format, 1);
+			format++;
+		}
 	}
 	va_end(args);
-	return (pcount);
+	return (p_count);
 }
